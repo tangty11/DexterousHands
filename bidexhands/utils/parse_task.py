@@ -29,6 +29,7 @@ from bidexhands.tasks.shadow_hand_block_stack import ShadowHandBlockStack
 # Allegro hand
 from bidexhands.tasks.allegro_hand_over import AllegroHandOver
 from bidexhands.tasks.allegro_hand_catch_underarm import AllegroHandCatchUnderarm
+from bidexhands.tasks.allegro_hand_catch_point_cloud import AllegroHandCatchPointCloud
 
 # Meta
 from bidexhands.tasks.shadow_hand_meta.shadow_hand_meta_mt1 import ShadowHandMetaMT1
