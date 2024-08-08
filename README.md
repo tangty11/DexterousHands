@@ -13,3 +13,7 @@
 ## Work
 Create a new task called allegro_hand_catch_point_cloud in task/AllegroHandCatchPointCloud.py.
 Pass `python train.py --task=AllegroHandCatchPointCloud --algo=ddpg` in DexterousHands/bidexhands/ to train.
+
+## ps
+If raise the error `RuntimeError: nvrtc: error: invalid value for --gpu-architecture (-arch)`, 
+remove `@torch.jit.script` in `isaacgym/torch_utils.py` and `task/AllegroHandCatchPointCloud.py`. 
