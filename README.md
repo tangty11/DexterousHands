@@ -11,3 +11,6 @@ torchaudio0.8.1
 (editor: vscode)
 
 ## Work
+Create a new task called allegro_hand_catch_point_cloud in task/AllegroHandCatchPointCloud.py.
+Pass `python train.py --task=AllegroHandCatchPointCloud --algo=ddpg` in DexterousHands/bidexhands/ to train.
+
