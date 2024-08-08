@@ -193,8 +193,9 @@ class ShadowHandPushBlock(BaseTask):
         rigid_body_tensor = self.gym.acquire_rigid_body_state_tensor(self.sim)
 
         sensor_tensor = self.gym.acquire_force_sensor_tensor(self.sim)
+        
         self.vec_sensor_tensor = gymtorch.wrap_tensor(sensor_tensor).view(self.num_envs, self.num_fingertips * 6)
-
+        
         dof_force_tensor = self.gym.acquire_dof_force_tensor(self.sim)
         self.dof_force_tensor = gymtorch.wrap_tensor(dof_force_tensor).view(self.num_envs, self.num_shadow_hand_dofs * 2 + self.num_object_dofs * 2)
         self.dof_force_tensor = self.dof_force_tensor[:, :48]
@@ -606,7 +607,7 @@ class ShadowHandPushBlock(BaseTask):
 
             self.envs.append(env_ptr)
             self.shadow_hands.append(shadow_hand_actor)
-
+        
         self.object_init_state = to_torch(self.object_init_state, device=self.device, dtype=torch.float).view(self.num_envs, 13)
         self.goal_states = self.object_init_state.clone()
         # self.goal_pose = self.goal_states[:, 0:7]
@@ -1255,7 +1256,7 @@ class ShadowHandPushBlock(BaseTask):
 ###=========================jit functions=========================###
 #####################################################################
 
-@torch.jit.script
+#@torch.jit.script
 def depth_image_to_point_cloud_GPU(camera_tensor, camera_view_matrix_inv, camera_proj_matrix, u, v, width:float, height:float, depth_bar:float, device:torch.device):
     # time1 = time.time()
     depth_buffer = camera_tensor.to(device)
@@ -1290,7 +1291,7 @@ def depth_image_to_point_cloud_GPU(camera_tensor, camera_view_matrix_inv, camera
 
     return points
 
-@torch.jit.script
+#@torch.jit.script
 def compute_hand_reward(
     rew_buf, reset_buf, reset_goal_buf, progress_buf, successes, consecutive_successes,
     max_episode_length: float, object_pos, object_rot, left_target_pos, left_target_rot, right_target_pos, right_target_rot, block_right_handle_pos, block_left_handle_pos,
@@ -1368,7 +1369,7 @@ def compute_hand_reward(
     left_goal_dist = torch.norm(left_target_pos - block_left_handle_pos, p=2, dim=-1)
     right_goal_dist = torch.norm(right_target_pos - block_right_handle_pos, p=2, dim=-1)
     # goal_dist = target_pos[:, 2] - object_pos[:, 2]
-
+    
     right_hand_dist = torch.norm(block_right_handle_pos - right_hand_pos, p=2, dim=-1)
     left_hand_dist = torch.norm(block_left_handle_pos - left_hand_pos, p=2, dim=-1)
 
@@ -1417,13 +1418,13 @@ def compute_hand_reward(
     return reward, resets, goal_resets, progress_buf, successes, cons_successes
 
 
-@torch.jit.script
+#@torch.jit.script
 def randomize_rotation(rand0, rand1, x_unit_tensor, y_unit_tensor):
     return quat_mul(quat_from_angle_axis(rand0 * np.pi, x_unit_tensor),
                     quat_from_angle_axis(rand1 * np.pi, y_unit_tensor))
 
 
-@torch.jit.script
+#@torch.jit.script
 def randomize_rotation_pen(rand0, rand1, max_angle, x_unit_tensor, y_unit_tensor, z_unit_tensor):
     rot = quat_mul(quat_from_angle_axis(0.5 * np.pi + rand0 * max_angle, x_unit_tensor),
                    quat_from_angle_axis(rand0 * np.pi, z_unit_tensor))

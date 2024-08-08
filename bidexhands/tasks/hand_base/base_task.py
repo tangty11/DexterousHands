@@ -132,7 +132,7 @@ class BaseTask():
 
         # apply actions
         self.pre_physics_step(actions)
-
+        
         # step physics and render each frame
         for i in range(self.control_freq_inv):
             self.render()
@@ -147,6 +147,7 @@ class BaseTask():
 
         if self.dr_randomizations.get('observations', None):
             self.obs_buf = self.dr_randomizations['observations']['noise_lambda'](self.obs_buf)
+
 
     def get_states(self):
         return self.states_buf

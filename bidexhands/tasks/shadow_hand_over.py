@@ -427,7 +427,7 @@ class ShadowHandOver(BaseTask):
             self.camera_u = torch.arange(0, self.camera_props.width, device=self.device)
             self.camera_v = torch.arange(0, self.camera_props.height, device=self.device)
 
-            self.camera_v2, self.camera_u2 = torch.meshgrid(self.camera_v, self.camera_u, indexing='ij')
+            self.camera_v2, self.camera_u2 = torch.meshgrid(self.camera_v, self.camera_u)   #mmm, indexing='ij')
 
             if self.point_cloud_debug:
                 import open3d as o3d
@@ -1052,7 +1052,7 @@ class ShadowHandOver(BaseTask):
 ###=========================jit functions=========================###
 #####################################################################
 
-@torch.jit.script
+#@torch.jit.script
 def depth_image_to_point_cloud_GPU(camera_tensor, camera_view_matrix_inv, camera_proj_matrix, u, v, width:float, height:float, depth_bar:float, device:torch.device):
     # time1 = time.time()
     depth_buffer = camera_tensor.to(device)
@@ -1087,7 +1087,7 @@ def depth_image_to_point_cloud_GPU(camera_tensor, camera_view_matrix_inv, camera
 
     return points
 
-@torch.jit.script
+#@torch.jit.script
 def compute_hand_reward(
     rew_buf, reset_buf, reset_goal_buf, progress_buf, successes, consecutive_successes,
     max_episode_length: float, object_pos, object_rot, target_pos, target_rot,
@@ -1147,6 +1147,8 @@ def compute_hand_reward(
         ignore_z_rot (bool): Is it necessary to ignore the rot of the z-axis, which is usually used 
             for some specific objects (e.g. pen)
     """
+    
+    # origin reward func
     # Distance from the hand to the object
     goal_dist = torch.norm(target_pos - object_pos, p=2, dim=-1)
     if ignore_z_rot:
@@ -1163,7 +1165,7 @@ def compute_hand_reward(
 
     # Total reward is: position distance + orientation alignment + action regularization + success bonus + fall penalty
     reward = torch.exp(-0.2*(dist_rew * dist_reward_scale + rot_dist))
-
+    
     # Find out which envs hit the goal and update successes count
     goal_resets = torch.where(torch.abs(goal_dist) <= 0, torch.ones_like(reset_goal_buf), reset_goal_buf)
     successes = torch.where(successes == 0, 
@@ -1195,13 +1197,13 @@ def compute_hand_reward(
     return reward, resets, goal_resets, progress_buf, successes, cons_successes
 
 
-@torch.jit.script
+#@torch.jit.script
 def randomize_rotation(rand0, rand1, x_unit_tensor, y_unit_tensor):
     return quat_mul(quat_from_angle_axis(rand0 * np.pi, x_unit_tensor),
                     quat_from_angle_axis(rand1 * np.pi, y_unit_tensor))
 
 
-@torch.jit.script
+#@torch.jit.script
 def randomize_rotation_pen(rand0, rand1, max_angle, x_unit_tensor, y_unit_tensor, z_unit_tensor):
     rot = quat_mul(quat_from_angle_axis(0.5 * np.pi + rand0 * max_angle, x_unit_tensor),
                    quat_from_angle_axis(rand0 * np.pi, z_unit_tensor))
